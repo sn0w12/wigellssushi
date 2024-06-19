@@ -32,6 +32,8 @@ public class CustomerOrder {
     )
     private List<Dish> dishes;
 
+    boolean takeaway;
+
     public Long getId() {
         return id;
     }
@@ -71,5 +73,13 @@ public class CustomerOrder {
 
     public void setDishes(List<Dish> dishes) {
         this.dishes = dishes;
+    }
+
+    public boolean isTakeaway() {
+        return takeaway;
+    }
+
+    public void setTakeaway(boolean takeaway) {
+        this.takeaway = takeaway;
     }
 }
