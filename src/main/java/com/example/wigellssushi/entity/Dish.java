@@ -15,6 +15,7 @@ public class Dish {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 50)
     private String name;
 
     @Column(name = "price_sek")

@@ -13,8 +13,10 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 50)
     private String name;
     private int maxGuests;
+    @Column(length = 200)
     private String equipment;
 
     @OneToMany(mappedBy = "room")

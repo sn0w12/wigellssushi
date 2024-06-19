@@ -14,8 +14,13 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 50)
     private String username;
+
+    @Column(length = 50)
     private String name;
+
+    @Column(length = 100)
     private String address;
 
     @OneToMany(mappedBy = "customer")
