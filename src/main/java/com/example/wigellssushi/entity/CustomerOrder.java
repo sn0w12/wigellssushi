@@ -1,15 +1,14 @@
 package com.example.wigellssushi.entity;
 
 import com.example.wigellssushi.util.CurrencyConverter;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
 
 @Entity
-@JsonIgnoreProperties("customer")
+@JsonIgnoreProperties({"customer"})
 public class CustomerOrder {
 
     @Id
@@ -18,7 +17,6 @@ public class CustomerOrder {
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
-    @JsonBackReference("customer-order")
     private Customer customer;
 
     @Column(name = "total_price_sek")
@@ -26,8 +24,12 @@ public class CustomerOrder {
     @Column(name = "total_price_euro")
     private double totalPriceEuro;
 
-    @OneToMany(mappedBy = "customerOrder")
-    @JsonManagedReference("order-dish")
+    @ManyToMany
+    @JoinTable(
+            name = "order_dish",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "dish_id")
+    )
     private List<Dish> dishes;
 
     public Long getId() {
@@ -71,4 +73,3 @@ public class CustomerOrder {
         this.dishes = dishes;
     }
 }
-

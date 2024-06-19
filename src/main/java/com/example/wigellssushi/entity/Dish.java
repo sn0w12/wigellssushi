@@ -1,12 +1,14 @@
 package com.example.wigellssushi.entity;
 
 import com.example.wigellssushi.util.CurrencyConverter;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
-@JsonIgnoreProperties({"customerOrder", "booking"})
+@JsonIgnoreProperties({"customerOrders"})
 public class Dish {
 
     @Id
@@ -21,15 +23,18 @@ public class Dish {
     @Column(name = "price_euro")
     private double priceEuro;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    @JsonBackReference("order-dish")
-    private CustomerOrder customerOrder;
+    @ManyToMany(mappedBy = "dishes")
+    @JsonIgnore
+    private List<CustomerOrder> customerOrders;
 
-    @ManyToOne
-    @JoinColumn(name = "booking_id")
-    @JsonBackReference("booking-dish")
-    private Booking booking;
+    public Dish() {
+    }
+
+    public Dish(String name, Double priceSEK) {
+        this.name = name;
+        this.priceSEK = priceSEK;
+        this.priceEuro = CurrencyConverter.convertSEKToEuro(priceSEK);
+    }
 
     public Long getId() {
         return id;
@@ -64,19 +69,11 @@ public class Dish {
         this.priceEuro = priceEuro;
     }
 
-    public CustomerOrder getCustomerOrder() {
-        return customerOrder;
+    public List<CustomerOrder> getCustomerOrders() {
+        return customerOrders;
     }
 
-    public void setCustomerOrder(CustomerOrder customerOrder) {
-        this.customerOrder = customerOrder;
-    }
-
-    public Booking getBooking() {
-        return booking;
-    }
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
+    public void setCustomerOrders(List<CustomerOrder> customerOrders) {
+        this.customerOrders = customerOrders;
     }
 }
