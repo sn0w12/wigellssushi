@@ -9,6 +9,8 @@ import com.example.wigellssushi.exceptions.ResourceNotFoundException;
 import com.example.wigellssushi.repository.BookingRepository;
 import com.example.wigellssushi.repository.DishRepository;
 import com.example.wigellssushi.repository.RoomRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final DishRepository dishRepository;
+    private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
 
     @Autowired
     public BookingService(BookingRepository bookingRepository, RoomRepository roomRepository, DishRepository dishRepository) {
@@ -68,7 +71,9 @@ public class BookingService {
             booking.getCustomerOrder().setTotalPriceSEK(totalPriceSek);
         }
 
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+        logger.info("Booking with id: " + savedBooking.getId() + " successfully added.");
+        return savedBooking;
     }
 
     public Booking updateBooking(Long id, Booking bookingDetails) {
@@ -99,7 +104,9 @@ public class BookingService {
                 existingBooking.setCustomerOrder(bookingDetails.getCustomerOrder());
             }
 
-            return bookingRepository.save(existingBooking);
+            Booking updatedBooking = bookingRepository.save(existingBooking);
+            logger.info("Booking with id: " + updatedBooking.getId() + " successfully updated.");
+            return updatedBooking;
         } else {
             throw new ResourceNotFoundException("Booking not found with id " + id);
         }
