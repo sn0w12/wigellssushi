@@ -1,13 +1,12 @@
 package com.example.wigellssushi.entity;
 
-import com.example.wigellssushi.util.CurrencyConverter;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.Date;
 
 @Entity
+@Table(name = "sushi_bookings")
 public class Booking {
 
     @Id
@@ -30,9 +29,23 @@ public class Booking {
     @JoinColumn(name = "room_id")
     private Room room;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "customer_order_id")
     private CustomerOrder customerOrder;
+
+    public Booking() {
+    }
+
+    public Booking(Long id, Customer customer, int numberOfGuests, Date date, double totalPriceSEK, double totalPriceEuro, Room room, CustomerOrder customerOrder) {
+        this.id = id;
+        this.customer = customer;
+        this.numberOfGuests = numberOfGuests;
+        this.date = date;
+        this.totalPriceSEK = totalPriceSEK;
+        this.totalPriceEuro = totalPriceEuro;
+        this.room = room;
+        this.customerOrder = customerOrder;
+    }
 
     public Long getId() {
         return id;
@@ -70,10 +83,7 @@ public class Booking {
         return totalPriceSEK;
     }
 
-    public void setTotalPriceSEK(double totalPriceSEK) {
-        this.totalPriceSEK = totalPriceSEK;
-        this.totalPriceEuro = CurrencyConverter.convertSEKToEuro(totalPriceSEK);
-    }
+    public void setTotalPriceSEK(double totalPriceSEK) { this.totalPriceSEK = totalPriceSEK; }
 
     public double getTotalPriceEuro() {
         return totalPriceEuro;

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,8 @@ public class BookingService {
     private final RoomRepository roomRepository;
     private final DishRepository dishRepository;
     private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Autowired
     public BookingService(BookingRepository bookingRepository, RoomRepository roomRepository, DishRepository dishRepository) {
@@ -39,7 +42,7 @@ public class BookingService {
             booking.setRoom(room);
         }
 
-        double totalPriceSek = 0;
+        double totalDishPriceSek = 0;
 
         CustomerOrder customerOrder = booking.getCustomerOrder();
         if (customerOrder != null) {
@@ -51,12 +54,12 @@ public class BookingService {
                     Dish existingDish = dishRepository.findById(dish.getId())
                             .orElseThrow(() -> new RuntimeException("Dish not found with id " + dish.getId()));
                     dishes.add(existingDish);
-                    totalPriceSek += existingDish.getPriceSEK();
+                    totalDishPriceSek += existingDish.getPriceSEK();
                 } else if (dish.getName() != null) {
                     Dish existingDish = dishRepository.findByName(dish.getName())
                             .orElseThrow(() -> new RuntimeException("Dish not found with name " + dish.getName()));
                     dishes.add(existingDish);
-                    totalPriceSek += existingDish.getPriceSEK();
+                    totalDishPriceSek += existingDish.getPriceSEK();
                 } else {
                     throw new RuntimeException("Dish must have either an ID or a name");
                 }
@@ -67,8 +70,11 @@ public class BookingService {
             throw new RuntimeException("Booking must have a CustomerOrder");
         }
 
-        if (booking.getCustomerOrder().getTotalPriceSEK() == 0.0) {
-            booking.getCustomerOrder().setTotalPriceSEK(totalPriceSek);
+        if (booking.getTotalPriceSEK() == 0.0) {
+            booking.setTotalPriceSEK(totalDishPriceSek);
+        }
+        if (booking.getTotalPriceEuro() == 0.0) {
+            booking.setTotalPriceEuro(restTemplate.getForObject("http://currency-service/api/v3/sektoeuro?amountInSEK=" + totalDishPriceSek, double.class));
         }
 
         Booking savedBooking = bookingRepository.save(booking);
@@ -92,7 +98,9 @@ public class BookingService {
                 existingBooking.setDate(bookingDetails.getDate());
             }
             if (bookingDetails.getTotalPriceSEK() != 0) {
-                existingBooking.setTotalPriceSEK(bookingDetails.getTotalPriceSEK());
+                double totalPriceSEK = bookingDetails.getTotalPriceSEK();
+                existingBooking.setTotalPriceSEK(totalPriceSEK);
+                existingBooking.setTotalPriceEuro(restTemplate.getForObject("http://currency-service/api/v3/sektoeuro?amountInSEK=" + totalPriceSEK, double.class));
             }
             if (bookingDetails.getTotalPriceEuro() != 0) {
                 existingBooking.setTotalPriceEuro(bookingDetails.getTotalPriceEuro());

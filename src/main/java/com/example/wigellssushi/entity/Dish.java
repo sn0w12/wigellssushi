@@ -1,6 +1,5 @@
 package com.example.wigellssushi.entity;
 
-import com.example.wigellssushi.util.CurrencyConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -8,6 +7,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(name = "sushi_dishes")
 @JsonIgnoreProperties({"customerOrders"})
 public class Dish {
 
@@ -24,17 +24,19 @@ public class Dish {
     @Column(name = "price_euro")
     private double priceEuro;
 
-    @ManyToMany(mappedBy = "dishes")
+    @ManyToMany(mappedBy = "dishes", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
     private List<CustomerOrder> customerOrders;
 
     public Dish() {
     }
 
-    public Dish(String name, Double priceSEK) {
+    public Dish(Long id, String name, double priceSEK, double priceEuro, List<CustomerOrder> customerOrders) {
+        this.id = id;
         this.name = name;
         this.priceSEK = priceSEK;
-        this.priceEuro = CurrencyConverter.convertSEKToEuro(priceSEK);
+        this.priceEuro = priceEuro;
+        this.customerOrders = customerOrders;
     }
 
     public Long getId() {
@@ -57,10 +59,7 @@ public class Dish {
         return priceSEK;
     }
 
-    public void setPriceSEK(double priceSEK) {
-        this.priceSEK = priceSEK;
-        this.priceEuro = CurrencyConverter.convertSEKToEuro(priceSEK);
-    }
+    public void setPriceSEK(double priceSEK) { this.priceSEK = priceSEK; }
 
     public double getPriceEuro() {
         return priceEuro;

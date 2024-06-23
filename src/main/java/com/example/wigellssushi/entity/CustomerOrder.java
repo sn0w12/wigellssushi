@@ -1,13 +1,14 @@
 package com.example.wigellssushi.entity;
 
-import com.example.wigellssushi.util.CurrencyConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
 @Entity
+@Table(name = "sushi_customerorders")
 @JsonIgnoreProperties({"customer"})
 public class CustomerOrder {
 
@@ -26,11 +27,26 @@ public class CustomerOrder {
 
     @ManyToMany
     @JoinTable(
-            name = "order_dish",
+            name = "sushi_order_dish",
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "dish_id")
     )
     private List<Dish> dishes;
+
+    @Transient
+    private RestTemplate restTemplate;
+
+    public CustomerOrder() {
+    }
+
+    public CustomerOrder(Long id, Customer customer, double totalPriceSEK, double totalPriceEuro, List<Dish> dishes, boolean takeaway) {
+        this.id = id;
+        this.customer = customer;
+        this.totalPriceSEK = totalPriceSEK;
+        this.totalPriceEuro = totalPriceEuro;
+        this.dishes = dishes;
+        this.takeaway = takeaway;
+    }
 
     boolean takeaway;
 
@@ -54,10 +70,7 @@ public class CustomerOrder {
         return totalPriceSEK;
     }
 
-    public void setTotalPriceSEK(double totalPriceSEK) {
-        this.totalPriceSEK = totalPriceSEK;
-        this.totalPriceEuro = CurrencyConverter.convertSEKToEuro(totalPriceSEK);
-    }
+    public void setTotalPriceSEK(double totalPriceSEK) { this.totalPriceSEK = totalPriceSEK; }
 
     public double getTotalPriceEuro() {
         return totalPriceEuro;
